@@ -84,6 +84,10 @@ venv/
 ENV/
 myenv/
 
+# pipenv
+Pipfile
+Pipfile.lock
+
 # Spyder project settings
 .spyderproject
 
@@ -92,3 +96,6 @@ myenv/
 
 # SQLite3
 db.sqlite3
+
+# VSCODE
+.vscode/
