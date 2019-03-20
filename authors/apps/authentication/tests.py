@@ -206,7 +206,7 @@ class LoginAPIViewTestCase(TestCase):
     def test_api_can_login_a_registered_user(self):
 
         response = self.client.post(
-            '/api/users/login',
+            '/api/users/login/',
             {"user": self.existing_user_data},
             format="json") 
 
@@ -219,7 +219,7 @@ class LoginAPIViewTestCase(TestCase):
             "password": "Enter-123"}
 
         response = self.client.post(
-            '/api/users/login',
+            '/api/users/login/',
             {"user": user_data},
             format="json") 
      
@@ -234,7 +234,7 @@ class LoginAPIViewTestCase(TestCase):
             "password": "enter-123"}  
 
         response = self.client.post(
-            '/api/users/login',
+            '/api/users/login/',
             {"user": user_data},
             format="json")
         
@@ -261,7 +261,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
     def test_api_can_retrieve_a_registered_user(self):
 
         response = self.client.get(
-            '/api/user',
+            '/api/user/',
             format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK) 
@@ -271,7 +271,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
         self.client.logout()
 
         response = self.client.get(
-            '/api/user',
+            '/api/user/',
             format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) 
@@ -284,7 +284,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
             "image": "https://myimages.com/erwt.png"}
 
         response = self.client.put(
-            '/api/user',
+            '/api/user/',
             {"user": new_user_data},
             format="json")
 
@@ -299,7 +299,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
         self.client.logout()
         
         response = self.client.put(
-            '/api/user',
+            '/api/user/',
             {"user": new_user_data},
             format="json")
 
