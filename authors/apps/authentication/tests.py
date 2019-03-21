@@ -3,8 +3,11 @@ from base64 import b64encode
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
+from rest_framework import serializers
 
 from .models import User, UserManager
+from .serializers import (
+    LoginSerializer, RegistrationSerializer, UserSerializer)
 
 
 class UserTestCase(TestCase):
@@ -27,7 +30,6 @@ class UserTestCase(TestCase):
 
         self.assertNotEqual(previous_count, current_count)
         self.assertEqual(str(self.user), self.email)
-    
     
     def test_model_returns_fullname_of_user(self):
         self.user.save()
@@ -75,7 +77,7 @@ class  UserManagerTestCase(TestCase):
             "password": self.password}
 
         self.assertRaises(TypeError, User.objects.create_user, **kwargs)
-    
+
     def test_manager_cannot_create_a_regular_user_without_email_field(self):
         kwargs = {
             "username": self.username,
@@ -304,3 +306,73 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
             format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) 
+
+class LoginSerializerTestCase(TestCase):
+
+    def setUp(self):
+        self.user_data= {
+            "username": "janejones",
+            "email": "jjones@email.com",
+            "password": "Enter-123"}
+        self.user = User.objects.create_user(**self.user_data)
+        self.serializer_class = LoginSerializer
+        self.serializer = self.serializer_class(data=self.user_data)
+    
+    def test_serializer_can_validate_a_registerd_user(self):
+        is_valid_data = self.serializer.is_valid(self.user_data)
+
+        self.assertTrue(is_valid_data)
+        self.assertEqual(self.user_data["email"], self.serializer.data["email"])
+    
+    def test_serializer_can_validate_an_unregisterd_user(self):
+        user_data= {
+            "username": "hjones",
+            "email": "hjones@email.com",
+            "password": "Enter-123"}
+
+        serializer = self.serializer_class(data=user_data)
+        is_valid_data = serializer.is_valid()
+
+        self.assertFalse(is_valid_data)
+        self.assertRaisesMessage(
+            serializers.ValidationError,
+            'A user with this email and password was not found.',
+            serializer.validate, 
+            user_data)
+    
+    def test_serializer_raises_an_exception_on_request_without_an_email(self):
+        user_data= {
+            "username": "janejones",
+            "password": "Enter-123"}
+
+        serializer = self.serializer_class(data=user_data)
+
+        self.assertRaises(
+            serializers.ValidationError, 
+            serializer.is_valid, 
+            raise_exception=True)
+        self.assertRaisesMessage(
+            serializers.ValidationError, 
+            'An email address is required to log in.',
+            serializer.validate, 
+            user_data)
+        
+    def test_serializer_raises_an_exception_on_request_without_password(self):
+        user_data= {
+            "username": "jjones",
+            "email": "jjones@email.com"}
+
+        serializer = self.serializer_class(data=user_data)
+
+        self.assertRaises(
+            serializers.ValidationError, 
+            serializer.is_valid, 
+            raise_exception=True)
+        self.assertRaisesMessage(
+            serializers.ValidationError, 
+            'A password is required to log in.',
+            serializer.validate, 
+            user_data)
+    
+
+    
