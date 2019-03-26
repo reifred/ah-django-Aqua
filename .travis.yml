@@ -5,8 +5,18 @@ python:
 
 install:
 - pip install -r requirements.txt
+
+after_success:
+- coveralls
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c "create database travis_ci_test;" -U postgres
+
 script:
-- python manage.py test
+  - python manage.py test
   
 after_success:
 - coveralls
