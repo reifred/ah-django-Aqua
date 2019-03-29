@@ -4,6 +4,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework import serializers
+from django.core import mail
+from django.urls import reverse
 
 from .models import User, UserManager
 from .serializers import (
@@ -212,16 +214,6 @@ class LoginAPIViewTestCase(TestCase):
             **self.existing_user_data)
         self.client = APIClient()
 
-    def test_api_can_login_a_registered_user(self):
-
-        response = self.client.post(
-            '/api/users/login/',
-            {"user": self.existing_user_data},
-            format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.existing_user.email, response.data["email"])
-
     def test_api_cannot_login_an_unregistered_user(self):
         user_data = {
             "email": "peter@email.com",
@@ -234,7 +226,7 @@ class LoginAPIViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(
-            'A user with this email and password was not found.',
+            'User not found or account not active.',
             response.data["errors"]['error'])
 
     def test_api_cannot_login_user_with_valid_email_wrong_password_combination(self):
@@ -249,7 +241,7 @@ class LoginAPIViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(
-            'A user with this email and password was not found.',
+            'User not found or account not active.',
             response.data["errors"]["error"]
         )
 
@@ -262,27 +254,47 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
 
     def setUp(self):
 
-        self.existing_user_data = {
-            "username": "janejones",
-            "email": "jjones@email.com",
+        self.user_data = {
+            "username": "janejones2",
+            "email": "jjones@email2.com",
             "password": "Enter-123"}
-
-        self.existing_user = User.objects.create_user(
-            **self.existing_user_data)
+        self.activate_url = reverse('authentication:activate-account')
+        self.register_url = reverse('authentication:register')
+        self.login_url = reverse('authentication:login')
+        self.user_action_url = reverse('authentication:user-action')
         self.client = APIClient()
+
         response = self.client.post(
-            '/api/users/login/',
-            {"user": {"email": "jjones@email.com", "password": "Enter-123"}},
-            format='json'
-        )
-        self.token = response.data["token"]
+            self.register_url, {"user": self.user_data}, format="json")
+
+        self.token = response.data["data"]["token"]
+
+        self.client.get(f"{self.activate_url}?token={self.token}", format='json')
+
+        response = self.client.post(
+            self.login_url, {"user": self.user_data}, format='json')
+
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
+    def test_verify_account_with_invalid_token(self):
+        invalid_token = "icVpZnJlZCIsImV4cCI6MTU1ODY3"
+        self.client.get(f"{self.activate_url}?token={invalid_token}", format='json')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + invalid_token)
+        response = self.client.get(self.user_action_url, format="json")
+        self.assertIn(
+            "Invalid authentication. Could not decode token.",
+            response.data["detail"])
+
+    def test_invalid_verification_link(self):
+        invalid_token = "icVpZnJlZCIsImV4cCI6MTU1ODY3"
+        response = self.client.get(f"{self.activate_url}?token={invalid_token}", format='json')
+        self.assertIn(
+            "Verifcation link is invalid. Check email for correct link.",
+            response.data["detail"])
 
     def test_api_can_retrieve_a_registered_user(self):
 
-        response = self.client.get(
-            '/api/user/',
-            format="json")
+        response = self.client.get(self.user_action_url, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -290,9 +302,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
 
         self.client.logout()
 
-        response = self.client.get(
-            '/api/user/',
-            format="json")
+        response = self.client.get(self.user_action_url, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -304,9 +314,7 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
             "image": "https://myimages.com/erwt.png"}
 
         response = self.client.put(
-            '/api/user/',
-            {"user": new_user_data},
-            format="json")
+            self.user_action_url, {"user": new_user_data}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -319,25 +327,23 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
         self.client.logout()
 
         response = self.client.put(
-            '/api/user/',
-            {"user": new_user_data},
-            format="json")
+            self.user_action_url, {"user": new_user_data}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_get_user_data_with_bad_authorization_header(self):
         response = self.client.post(
-            '/api/users/login/', {
+            self.login_url, {
                 "user": {"email": "jjones@email.com", "password": "Enter-123"}
                 }, format='json')
         self.client.credentials(HTTP_AUTHORIZATION='Fred ' + self.token)
-        response = self.client.get('/api/user/', format="json")
+        response = self.client.get(self.login_url, format="json")
         self.assertIn("Bad Authorization header.", response.data["detail"])
 
     def test_api_get_user_data_with_invalid_token(self):
-        token = "icVpZnJlZCIsImV4cCI6MTU1ODY3"
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
-        response = self.client.get('/api/user/', format="json")
+        invalid_token = "icVpZnJlZCIsImV4cCI6MTU1ODY3"
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + invalid_token)
+        response = self.client.get(self.user_action_url, format="json")
         self.assertIn(
             "Invalid authentication. Could not decode token.",
             response.data["detail"])
@@ -354,13 +360,6 @@ class LoginSerializerTestCase(TestCase):
         self.serializer_class = LoginSerializer
         self.serializer = self.serializer_class(data=self.user_data)
 
-    def test_serializer_can_validate_a_registerd_user(self):
-        is_valid_data = self.serializer.is_valid(self.user_data)
-
-        self.assertTrue(is_valid_data)
-        self.assertEqual(self.user_data["email"],
-                         self.serializer.data["email"])
-
     def test_serializer_can_validate_an_unregisterd_user(self):
         user_data = {
             "username": "hjones",
@@ -373,7 +372,7 @@ class LoginSerializerTestCase(TestCase):
         self.assertFalse(is_valid_data)
         self.assertRaisesMessage(
             serializers.ValidationError,
-            'A user with this email and password was not found.',
+            'User not found or account not active.',
             serializer.validate,
             user_data)
 
