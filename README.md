@@ -1,5 +1,6 @@
 Authors Haven - A Social platform for the creative at heart.
 [![Build Status](https://travis-ci.com/aqua-organisation/ah-django-Aqua.svg?branch=develop)](https://travis-ci.com/aqua-organisation/ah-django-Aqua)
+[![Coverage Status](https://coveralls.io/repos/github/aqua-organisation/ah-django-Aqua/badge.svg?branch=develop)](https://coveralls.io/github/aqua-organisation/ah-django-Aqua?branch=develop)
 =======
 
 ## Vision
