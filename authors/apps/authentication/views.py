@@ -1,13 +1,20 @@
-from rest_framework import status
+from rest_framework import status, exceptions
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.conf import settings
 
+from .models import User
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
 )
+
+from django.core.mail import send_mail
+
+import os
+import jwt
 
 
 class RegistrationAPIView(APIView):
@@ -26,7 +33,27 @@ class RegistrationAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
+
+        url = f"{BASE_URL}/api/users/verify?token={serializer.data['token']}"
+
+        subject = 'Activate your Authors Haven account'
+        body = f"Hi {serializer.data['username']}, \
+                     \nThanks for signing up for Authors Haven account!' \
+                     '\nPlease confirm your account by clicking the link below. \
+                         \n{url} \
+                         \n\nThe Aqua Team."
+        send_mail(
+            subject, body,
+            'noreply@aqua.com',
+            [serializer.data["email"]],
+            fail_silently=True
+        )
+        data = {
+            "message": "Account created! Check your email to activate this account.",
+            "data": serializer.data
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class LoginAPIView(APIView):
@@ -71,3 +98,24 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ActivateAccount(APIView):
+    def get(self, request):
+        token = request.query_params.get('token')
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY)
+        except jwt.ExpiredSignatureError:
+            msg = 'Verficaton link expired. Sign up again.'
+            raise exceptions.AuthenticationFailed(msg)
+        except jwt.InvalidTokenError:
+            msg = 'Verifcation link is invalid. Check email for correct link.'
+            raise exceptions.AuthenticationFailed(msg)
+
+        user = User.objects.filter(username=payload['usn'])
+        user.update(is_active=True)
+        return Response(
+            {"message": "Your Email has been verified,you can now login"}, 
+            status.HTTP_200_OK
+        )

@@ -70,7 +70,7 @@ class LoginSerializer(serializers.Serializer):
         # `authenticate` will return `None`. Raise an exception in this case.
         if user is None:
             raise serializers.ValidationError(
-                'A user with this email and password was not found.'
+                'User not found or account not active.'
             )
 
         # Django provides a flag on our `User` model called `is_active`. The
