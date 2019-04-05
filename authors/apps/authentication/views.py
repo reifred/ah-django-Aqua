@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
+from datetime import datetime, timedelta
 
 from .models import User
 from .renderers import UserJSONRenderer
@@ -119,3 +120,65 @@ class ActivateAccount(APIView):
             {"message": "Your Email has been verified,you can now login"}, 
             status.HTTP_200_OK
         )
+
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        try:
+            if not request.data["email"]:
+                raise exceptions.ValidationError("Email address should not be empty")
+            token = jwt.encode({
+                'email': request.data["email"],
+                'exp': datetime.utcnow() + timedelta(hours=1)
+            }, settings.SECRET_KEY, algorithm='HS256').decode('utf-8')
+
+            BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
+
+            url = f"{BASE_URL}/api/users/new-password/?token={token}"
+
+            subject = 'Authors Haven account. Password recovery'
+            body = f"We have recieved a request to reset your password. \
+                        \nUse the link below to set up a new password for your account. \
+                        \nIf you did not request to reset your password, ignore this email. \
+                            \n{url} \
+                            \n\nThe Aqua Team."
+            send_mail(
+                subject, body,
+                'noreply@aqua.com',
+                [request.data["email"]],
+                fail_silently=True
+            )
+            data = {
+                "message": "Please check your email for recovery password link.",
+                "status": status.HTTP_201_CREATED
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        except KeyError:
+            raise exceptions.ValidationError("Email field required to reset password")
+
+class NewPasswordView(APIView):
+    def patch(self, request):
+        try:
+            password = request.data["password"]
+            if len(password) < 8:
+                raise exceptions.ValidationError(
+                    "Password length must be greater than 7 characters")
+            token = request.query_params.get('token')
+            payload = jwt.decode(token, settings.SECRET_KEY)
+            user = User.objects.filter(email=payload["email"]).first()
+            user.set_password(password)
+            user.save()
+            return Response({
+                "message": "Your password has been changed successfully",
+                "status": status.HTTP_200_OK
+            })
+        except jwt.ExpiredSignatureError:
+            raise exceptions.ParseError(
+                "Verficaton link expired. Reset password again.", 
+                )
+        except jwt.InvalidTokenError:
+            raise exceptions.ParseError(
+                "Verifcation link is invalid. Check email for correct link.", 
+                )
+        except KeyError:
+            raise exceptions.ValidationError("Password field required to change password")

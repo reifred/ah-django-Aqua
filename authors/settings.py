@@ -151,10 +151,8 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # Tell nose on which apps to measure coverage
 NOSE_ARGS = [
-        '--with-coverage',
         '--cover-package=authors',
         '--cover-erase',
-        '--cover-inclusive',
 ]
 
 # Settings for configuring the app to Heroku
