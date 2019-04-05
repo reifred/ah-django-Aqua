@@ -56,5 +56,11 @@ invalid_email = {
                 "email": "peter@.com",
                 "password": "Password1"
         }
+user_data_2 = {
+            "username": "nicksbro",
+            "email": "nicholus@gmail.com",
+            "password": "Enter1234"
+            }
 invalid_token = "icVpZnJlZCIsImV4cCI6MTU1ODY3"
 expired_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InJlaWZyZWQzM0BnbWFpbC5jb20iLCJleHAiOjE1NTQxOTYxMTd9.TAJa94Vvj7S_4nCDJqWGItbRBEsvpybM3Qc_Pp-NYwE"
+profiles = '/api/profiles/'
