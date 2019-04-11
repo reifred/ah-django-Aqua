@@ -100,3 +100,5 @@ class CreateArticleSerializerTestCase(TestCase):
             'This field is required.',
             serializer.is_valid,
             article_without_author_id)
+
+    

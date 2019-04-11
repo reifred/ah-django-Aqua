@@ -2,7 +2,6 @@ import json
 
 from rest_framework.renderers import JSONRenderer
 
-
 class ArticleJSONRenderer(JSONRenderer):
     charset = 'utf-8'
 
@@ -30,6 +29,7 @@ class ArticleJSONRenderer(JSONRenderer):
             "updatedAt": f"{article.updated_at}",
             "favorited": article.favorited,
             "favoritesCount": article.favorites_count,
+            "read_time": article.read_time,
         }
         data.update(article_details)
 
@@ -40,3 +40,4 @@ class ArticleJSONRenderer(JSONRenderer):
         data.update({"author": author_details})
 
         return data
+

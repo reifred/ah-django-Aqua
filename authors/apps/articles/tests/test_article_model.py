@@ -39,3 +39,4 @@ class ArticleTestCase(TestCase):
 
         self.assertEqual(slug1, expected)
         self.assertNotEqual(slug1, slug2)
+
