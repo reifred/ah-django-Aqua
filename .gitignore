@@ -80,10 +80,12 @@ celerybeat-schedule
 .env
 
 # virtualenv
+
 venv/
 ENV/
 myenv/
 .local/
+newenv/
 
 # pipenv
 Pipfile
@@ -100,3 +102,19 @@ db.sqlite3
 
 # VSCODE
 .vscode/
+
+#pytest
+.pytest_cache/
+__pycache__/
+
+
+#ENV VARIABLES
+.gitignore
+newenv/"sendgrid.env" 
+sendgrid.env
+newenv/".env"
+.env
+env.example
+newenv/*
+environment/
+
