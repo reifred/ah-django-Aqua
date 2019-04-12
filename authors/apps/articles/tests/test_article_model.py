@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from authors.apps.articles.models import Article
-from authors.apps.articles.tests.test_data import valid_article
+from authors.apps.articles.tests.test_data import slug, valid_article
 from authors.apps.authentication.models import User
 from authors.apps.authentication.tests.test_data import valid_user
 
@@ -31,7 +31,7 @@ class ArticleTestCase(TestCase):
 
     def test_model_can_create_a_unique_slag(self):
         slug1 = self.article.get_unique_slag(self.title, 'slug')
-        expected = "how-to-train-your-dragon"
+        expected = slug
 
         new_article = Article(**valid_article)
         new_article.save()
@@ -40,3 +40,11 @@ class ArticleTestCase(TestCase):
         self.assertEqual(slug1, expected)
         self.assertNotEqual(slug1, slug2)
 
+    def test_model_can_get_all_articles(self):
+        self.article.save()
+        new_article = Article(**valid_article)
+        new_article.save()
+        EXPECTED = 2
+        articles = Article.objects.all()
+
+        self.assertEqual(articles.count(), EXPECTED)

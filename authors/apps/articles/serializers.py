@@ -1,8 +1,8 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from authors.apps.authentication.models import User
 from authors.apps.authentication.serializers import UserSerializer
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Article
 import readtime
@@ -32,4 +32,12 @@ class CreateArticleSerializer(serializers.ModelSerializer):
         result = read_time.text
         validated_data.update({'read_time': str(result+" read")})
         return Article.objects.create(**validated_data)
+
+
+
+class ReadArticlesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Article
+        exclude = ('id',)
 

@@ -19,6 +19,7 @@ article_without_body = {
     "description": "Ever wonder how?"
 }
 
+
 valid_article_2= {
     "title": "How to train your dragon",
     "description": "Ever wonder how?",
@@ -46,3 +47,12 @@ valid_article_2= {
             talled  to check if the email the user signs up with is valid(like\
             their emails are not fake). The tests seem                                                                                                                                                                                                             Ask Question I added validate_mail and also installed py3dns to check if the email the user signs up with is valid(like their emails are not fake). The tests seem Ask Question I added validate_mail and also installed py3dns to check if the email the user signs up with is valid(like their emails are not fake). The tests seem  Ask Question I added validate_mail and also installed py3dns to check if the email the user signs up with is valid(like their emails are not fake). The tests seem Ask Question I added validate_mail and also installed py3dns to check if the email the user signs up with is valid(like their emails are not fake). The tests seem Ask Question I added validate_mail and also installed py3dns to check if the email the user signs up with is valid(like their emails are not fake). The tests seem v "
 }
+
+slug = "how-to-train-your-dragon"
+
+non_existent_slug = "Three-blind-mice"
+
+auth_error = "Authentication credentials were not provided."
+
+not_found = "Not found"
+
