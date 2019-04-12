@@ -117,4 +117,6 @@ newenv/".env"
 env.example
 newenv/*
 environment/
+now/
+
 

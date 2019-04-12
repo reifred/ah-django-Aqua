@@ -25,3 +25,4 @@ class CreateArticleAPIView(APIView):
         return Response(
             serializer.validated_data,
             status=status.HTTP_201_CREATED)
+

@@ -23,10 +23,13 @@ class Article(models.Model):
 
     favorites_count = models.IntegerField(default=0)
 
+
     author = models.ForeignKey(
         User,
         related_name='articles',
         on_delete=models.CASCADE)
+
+    read_time = models.TextField()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -51,3 +54,4 @@ class Article(models.Model):
             extention += 1
 
         return unique_slug
+
