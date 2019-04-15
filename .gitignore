@@ -100,3 +100,6 @@ db.sqlite3
 
 # VSCODE
 .vscode/
+
+# Migration data
+authors/apps/articles/migrations/*

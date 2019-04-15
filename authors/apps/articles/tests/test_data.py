@@ -18,3 +18,10 @@ article_without_body = {
     "title": "How to train your dragon",
     "description": "Ever wonder how?"
 }
+
+
+new_valid_article = {
+    "title": "How to train your robot",
+    "description": "Steps taken to make your robot dance?",
+    "body": "You must be a good dancer yourself"
+}
