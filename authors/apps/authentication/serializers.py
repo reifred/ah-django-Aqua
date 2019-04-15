@@ -4,16 +4,20 @@ from rest_framework import serializers
 
 from .models import User
 
+import re
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
 
+    
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
     password = serializers.CharField(
         max_length=128,
         min_length=8,
         write_only=True
+
     )
 
     # The client should not be able to send a token along with a registration
@@ -28,6 +32,30 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Use the `create_user` method we wrote earlier to create a new user.
+        password = validated_data.get('password') #we get a key from the dictionary validated data
+        email = validated_data.get('email')
+        username = validated_data.get('username')
+        pattern = re.compile(
+                r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,128}$"
+            )
+        if not pattern.match(password):
+            raise serializers.ValidationError(
+                {
+                    "password" :[
+                    "password must contain a numeric character"
+                    ]
+                }
+                )
+
+        
+        elif len(username)< 4 or not username.isalnum():
+            raise serializers.ValidationError(
+                {
+                    "username" :[
+                    "username should be atleast 4 characters long and shouldnt contain special characters"
+                    ]
+                }
+                )
         return User.objects.create_user(**validated_data)
 
 

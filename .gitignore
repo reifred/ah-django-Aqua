@@ -80,10 +80,12 @@ celerybeat-schedule
 .env
 
 # virtualenv
+
 venv/
 ENV/
 myenv/
 .local/
+newenv/
 
 # pipenv
 Pipfile
@@ -103,3 +105,21 @@ db.sqlite3
 
 # Migration data
 authors/apps/articles/migrations/
+
+#pytest
+.pytest_cache/
+__pycache__/
+
+
+#ENV VARIABLES
+.gitignore
+newenv/"sendgrid.env" 
+sendgrid.env
+newenv/".env"
+.env
+env.example
+newenv/*
+environment/
+now/
+
+

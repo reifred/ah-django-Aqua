@@ -1,12 +1,17 @@
 import json
 
 from rest_framework.renderers import JSONRenderer
-
+from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 
 class ArticleJSONRenderer(JSONRenderer):
     charset = 'utf-8'
 
     def render(self, data, media_type=None, renderer_context=None):
+        if isinstance(data, ReturnList):
+            return self.render_articles(data)
+
+        if isinstance(data, ReturnDict):
+            return self.render_article(data)
 
         article = data.get('article', None)
 
@@ -20,6 +25,20 @@ class ArticleJSONRenderer(JSONRenderer):
             'article': article_dict
         })
 
+    def render_articles(self, data):
+        articles = json.loads(
+            super(ArticleJSONRenderer, self).render(data).decode()
+        )
+        return json.dumps({
+            "articles": articles,
+            "articlesCount": len(articles)
+        })
+
+    def render_article(self, data):
+        return json.dumps({
+            "article": data
+        })
+
     def convert_data_to_dictionary(self, data):
 
         article = data.pop("article")
@@ -30,6 +49,7 @@ class ArticleJSONRenderer(JSONRenderer):
             "updatedAt": f"{article.updated_at}",
             "favorited": article.favorited,
             "favoritesCount": article.favorites_count,
+            "read_time": article.read_time,
         }
         data.update(article_details)
 
@@ -40,3 +60,4 @@ class ArticleJSONRenderer(JSONRenderer):
         data.update({"author": author_details})
 
         return data
+
