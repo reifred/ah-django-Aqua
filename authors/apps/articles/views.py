@@ -40,7 +40,7 @@ class ArticlesAPIView(APIView):
 
 
 class RetrieveArticleApiView(RetrieveAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, IsOwnerOrReadOnly,)
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ReadArticlesSerializer
 
@@ -57,12 +57,7 @@ class RetrieveArticleApiView(RetrieveAPIView):
         except Article.DoesNotExist:
             raise Http404
 
-            
-class DestroyArticleAPIView(APIView):
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
-
     def delete(self, request, slug, format=None):
-
         try:
             article = Article.objects.get(slug=slug)
             self.check_object_permissions(self.request, article)
@@ -71,3 +66,4 @@ class DestroyArticleAPIView(APIView):
         if request.method == 'DELETE':
             article.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
