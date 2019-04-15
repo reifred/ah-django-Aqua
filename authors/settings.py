@@ -163,10 +163,10 @@ NOSE_ARGS = [
         '--cover-erase',
 ]
 
-# # Settings for configuring the app to Heroku
-# if '/app' in os.environ['HOME']:
-#     import django_heroku
-#     django_heroku.settings(locals())
+# Settings for configuring the app to Heroku
+if '/app' in os.environ['HOME']:
+    import django_heroku
+    django_heroku.settings(locals())
 
 # Email settings
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', '')

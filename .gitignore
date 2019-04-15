@@ -102,4 +102,4 @@ db.sqlite3
 .vscode/
 
 # Migration data
-authors/apps/articles/migrations/*
+authors/apps/articles/migrations/
