@@ -19,6 +19,9 @@ article_without_body = {
     "description": "Ever wonder how?"
 }
 
+update_article_title = {
+    "title": "How to train my dragon"
+}
 
 valid_article_2= {
     "title": "How to train your dragon",
@@ -55,4 +58,3 @@ non_existent_slug = "Three-blind-mice"
 auth_error = "Authentication credentials were not provided."
 
 not_found = "Not found"
-

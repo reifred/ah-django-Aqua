@@ -10,20 +10,12 @@ class ArticleJSONRenderer(JSONRenderer):
         if isinstance(data, ReturnList):
             return self.render_articles(data)
 
-        if isinstance(data, ReturnDict):
-            return self.render_article(data)
+        errors = data.get('errors', None)
 
-        article = data.get('article', None)
+        if errors is not None:
+            return super(ArticleJSONRenderer, self).render(data)
 
-        if article is None:
-            errors = {"errors": data}
-            return super(ArticleJSONRenderer, self).render(errors)
-
-        article_dict = self.convert_data_to_dictionary(data)
-
-        return json.dumps({
-            'article': article_dict
-        })
+        return json.dumps({'article': data}, default=str)
 
     def render_articles(self, data):
         articles = json.loads(
@@ -33,31 +25,3 @@ class ArticleJSONRenderer(JSONRenderer):
             "articles": articles,
             "articlesCount": len(articles)
         })
-
-    def render_article(self, data):
-        return json.dumps({
-            "article": data
-        })
-
-    def convert_data_to_dictionary(self, data):
-
-        article = data.pop("article")
-
-        article_details = {
-            "slug": article.slug,
-            "createdAt": f"{article.created_at}",
-            "updatedAt": f"{article.updated_at}",
-            "favorited": article.favorited,
-            "favoritesCount": article.favorites_count,
-            "read_time": article.read_time,
-        }
-        data.update(article_details)
-
-        author = data.pop("author")
-        author_details = {
-            "username": author.username
-        }
-        data.update({"author": author_details})
-
-        return data
-
