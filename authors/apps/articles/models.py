@@ -31,7 +31,7 @@ class Article(models.Model):
     read_time = models.TextField()
 
     def __str__(self):
-        return self.title
+        return self.slug
 
     def save(self, *args, **kwargs):
         if not self.slug:

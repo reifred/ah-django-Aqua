@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'django_nose',
+    'mptt',
 
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
     'authors.apps.articles',
+    'authors.apps.comments',
 ]
 
 MIDDLEWARE = [
