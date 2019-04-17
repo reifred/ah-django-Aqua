@@ -6,9 +6,6 @@ python:
 install:
 - pip install -r requirements.txt
 
-after_success:
-- coveralls
-
 services:
   - postgresql
 
@@ -23,4 +20,3 @@ script:
   
 after_success:
 - coveralls
-
