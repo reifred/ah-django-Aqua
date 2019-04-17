@@ -21,6 +21,8 @@ class DestroyArticleAPIViewTestCase(TestCase):
     def test_api_can_delete_an_article_with_authenticated_user(self):
 
         article = self.data
+        
+        self.client.force_authenticate(user=user)
 
         self.client.post(
             '/api/articles/',
