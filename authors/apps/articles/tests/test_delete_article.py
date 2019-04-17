@@ -11,18 +11,18 @@ from authors.apps.authentication.tests.test_data import valid_user3, valid_user4
 class DestroyArticleAPIViewTestCase(TestCase):
 
     def setUp(self):
-        user = User.objects.create_user(**valid_user3)
+        self.user = User.objects.create_user(**valid_user3)
         self.user2 = User.objects.create_user(**valid_user4)
 
         self.client = APIClient()
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.user)
         self.data = new_valid_article
 
     def test_api_can_delete_an_article_with_authenticated_user(self):
 
         article = self.data
         
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.user)
 
         self.client.post(
             '/api/articles/',
