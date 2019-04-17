@@ -12,6 +12,9 @@ after_success:
 services:
   - postgresql
 
+addons:
+ postgresql: "9.6"
+ 
 before_script:
   - psql -c "create database travis_ci_test;" -U postgres
 

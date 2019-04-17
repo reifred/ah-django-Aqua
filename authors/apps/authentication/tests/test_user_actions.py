@@ -3,7 +3,12 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from .app_urls import register_url, login_url, activate_url, user_action_url
-from .test_data import valid_user, invalid_token
+from .test_data import (
+    valid_user, 
+    invalid_token, 
+    user_data_2,
+    profiles
+    )
 
 
 class UserRetrieveUpdateAPIViewTestCase(TestCase):
@@ -17,6 +22,8 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
 
         response = self.client.post(
             register_url, {"user": valid_user}, format="json")
+        response = self.client.post(
+            register_url, {"user": user_data_2}, format="json")
 
         self.token = response.data["data"]["token"]
 
@@ -36,7 +43,9 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
             response.data["errors"]["detail"])
 
     def test_invalid_verification_link(self):
-        response = self.client.get(f"{activate_url}?token={invalid_token}", format='json')
+        response = self.client.get(
+            f"{activate_url}?token={invalid_token}", format='json'
+            )
         self.assertIn(
             "Verifcation link is invalid. Check email for correct link.",
             response.data["errors"]["detail"])
@@ -86,7 +95,10 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION='Fred ' + self.token)
         response = self.client.get(login_url, format="json")
-        self.assertIn("Bad Authorization header.", response.data["errors"]["detail"])
+        self.assertIn(
+            "Bad Authorization header.", 
+            response.data["errors"]["detail"]
+            )
 
     def test_api_get_user_data_with_invalid_token(self):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + invalid_token)
@@ -94,3 +106,69 @@ class UserRetrieveUpdateAPIViewTestCase(TestCase):
         self.assertIn(
             "Invalid authentication. Could not decode token.",
             response.data["errors"]["detail"])
+
+    def test_api_can_allow_user_to_view_another_person_status(self):
+        response = self.client.get(
+            '/api/profiles/nicksbro/',
+            format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("nicksbro", response.data["username"])
+
+    def test_profile_created_on_user_registration(self):
+        response = self.client.get(
+            '/api/profiles/nicksbro/',
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("", response.data["username"])
+        self.assertIn("", response.data["image"])
+
+    def test_api_cannot_retrieve_a_non_existing_profile(self):
+        response = self.client.get(
+            '/api/profiles/jane/',
+            format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn(
+            "The requested profile does not exist.",
+            response.data["errors"]["detail"])
+
+    def test_api_user_cannot_update_other_persons_profiles(self):
+        new_user_data = {
+            "email": "jjones@email.com",
+            "bio": "I like eggs for breakfast",
+            "image": "https://myimages.com/erwt.png"}
+        response = self.client.put(
+            '/api/profiles/nicksbro/',
+            {"user": new_user_data},
+            format="json")
+
+        self.assertEqual(
+            response.status_code, 
+            status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+
+    def test_user_can_view_their_own_status(self):
+        response = self.client.get(
+            '/api/user/',
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_non_authenticated_user_cant_see_a_list_of_profiles(self):
+        self.client.logout()
+        response = self.client.get(
+            profiles,
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn(
+            "Authentication credentials were not provided.", 
+            response.data['detail']
+            )
+
+    def test_authenticated_user_can_retrieve_all_profiles(self):
+        response = self.client.get(
+            profiles,
+        )
+        user_profiles_expected = 2
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data),user_profiles_expected)
