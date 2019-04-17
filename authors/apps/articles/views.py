@@ -37,7 +37,7 @@ class ListCreateArticleAPIView(APIView):
 class RetrieveArticleApiView(RetrieveUpdateDestroyAPIView):
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (IsOwnerOrReadOnly,IsAuthenticatedOrReadOnly)
     lookup_field = 'slug'
     queryset = Article.objects.select_related('author')
     def update(self, request, slug, *args, **kwargs):
@@ -67,9 +67,10 @@ class RetrieveArticleApiView(RetrieveUpdateDestroyAPIView):
     
     def delete(self, request, slug, *args, **kwargs):
         try:
-            article = Article.objects.get(slug=slug)
+            article = self.queryset.get(slug=slug)
         except Article.DoesNotExist:
-            raise Http404
+            raise ArticleDoesNotExist
+        
         self.check_object_permissions(self.request, article)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

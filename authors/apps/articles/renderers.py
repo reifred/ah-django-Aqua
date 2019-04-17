@@ -10,10 +10,11 @@ class ArticleJSONRenderer(JSONRenderer):
         if isinstance(data, ReturnList):
             return self.render_articles(data)
 
-        errors = data.get('errors', None)
-
         if data is None:
             return ''
+
+        errors = data.get('errors', None)
+
 
         article = data.get('article', None)
 
