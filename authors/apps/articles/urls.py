@@ -2,11 +2,11 @@ from django.conf.urls import url
 from django.urls import path
 
 from .views import (
-    ListCreateArticleAPIView, RetrieveUpdateDestroyAPIView
+    ListCreateArticleAPIView, RetrieveArticleApiView
 )
 
 urlpatterns = [
     path('articles/', ListCreateArticleAPIView.as_view()),
-    path('articles/<slug:slug>/', RetrieveUpdateDestroyAPIView.as_view())
+    path('articles/<slug:slug>/', RetrieveArticleApiView.as_view())
 ]
 
