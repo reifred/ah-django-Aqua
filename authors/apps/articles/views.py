@@ -37,7 +37,7 @@ class ListCreateArticleAPIView(APIView):
 class RetrieveArticleApiView(RetrieveUpdateDestroyAPIView):
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    permission_classes = (IsOwnerOrReadOnly,)
     lookup_field = 'slug'
     queryset = Article.objects.select_related('author')
     def update(self, request, slug, *args, **kwargs):
