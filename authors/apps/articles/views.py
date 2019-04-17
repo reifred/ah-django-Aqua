@@ -66,7 +66,10 @@ class RetrieveArticleApiView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, slug, *args, **kwargs):
-        article = self.get_object(slug=slug)
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise Http404
         self.check_object_permissions(self.request, article)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
