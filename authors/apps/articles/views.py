@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -39,7 +39,7 @@ class ArticlesAPIView(APIView):
             status=status.HTTP_200_OK)
 
 
-class RetrieveArticleApiView(RetrieveAPIView):
+class RetrieveArticleApiView(RetrieveUpdateDestroyAPIView):
     permission_classes = (AllowAny, IsOwnerOrReadOnly,)
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ReadArticlesSerializer
@@ -57,13 +57,10 @@ class RetrieveArticleApiView(RetrieveAPIView):
         except Article.DoesNotExist:
             raise Http404
 
-    def delete(self, request, slug, format=None):
-        try:
-            article = Article.objects.get(slug=slug)
-            self.check_object_permissions(self.request, article)
-        except Article.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'DELETE':
-            article.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, slug, *args, **kwargs):
+        self.renderer_classes = None
+        article = self.get_object(slug=slug)
+        self.check_object_permissions(self.request, article)
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 

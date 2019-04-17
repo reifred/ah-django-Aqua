@@ -13,6 +13,9 @@ class ArticleJSONRenderer(JSONRenderer):
         if isinstance(data, ReturnDict):
             return self.render_article(data)
 
+        if data is None:
+            return ''
+
         article = data.get('article', None)
 
         if article is None:
