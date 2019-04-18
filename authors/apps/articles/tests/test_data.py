@@ -58,3 +58,35 @@ non_existent_slug = "Three-blind-mice"
 auth_error = "Authentication credentials were not provided."
 
 not_found = "Not found"
+
+valid_rating = {
+    "article":{
+               "ratings":5
+}
+}
+
+invalid_rating = {  
+    "article":{
+               "ratings":7
+}}
+
+invalid_rating2 = {
+    "article":{
+               "ratings":-1
+}}
+
+valid_rating_2 = {
+    "article":{
+               "ratings":3
+}}
+
+invalid_integer = {
+    "article":{
+               "ratings":1.5
+}}
+
+def signup_and_login_user(User,valid_user2,client):
+    user = User.objects.create_user(**valid_user2)
+    client.force_authenticate(user=user)
+    loged_in_user = client.login(**valid_user2)
+    return loged_in_user

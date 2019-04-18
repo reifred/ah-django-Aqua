@@ -37,3 +37,22 @@ class Article(models.Model):
         if not self.slug:
             self.slug = get_unique_slug(self, self.title, 'title', 'slug')
         super().save(*args, **kwargs)
+
+
+class Ratings(models.Model):
+    ratings = models.DecimalField(
+        max_digits=5, decimal_places=0)
+    ratings_by = models.ForeignKey(
+        Profile,
+        related_name='ratings',
+        on_delete=models.CASCADE
+        )
+    article = models.ForeignKey(
+        Article,
+        related_name="all_ratings",
+        on_delete=models.CASCADE
+        )
+    rated_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-ratings', ]

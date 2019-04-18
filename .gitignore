@@ -112,4 +112,6 @@ __pycache__/
 
 #ENV VARIABLES
 .gitignore
-envs
+env/
+envs/
+

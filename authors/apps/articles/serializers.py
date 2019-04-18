@@ -5,11 +5,12 @@ from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.profiles.serializers import ProfileSerializer
 
 from authors.apps.authentication.serializers import UserSerializer
-from .models import Article
-
+from .models import Article, Ratings
+from authors.apps.authentication.models import User
 import readtime
 
 from authors.apps.core.utilities import get_unique_slug
+from django.db.models import Avg
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -24,12 +25,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
     read_time = serializers.SerializerMethodField(method_name='get_readTime')
     favourited = serializers.SerializerMethodField()
+    average_ratings = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Article
         fields = [
             'slug', 'title', 'description', 'body', 'createdAt', 
-            'updatedAt', 'read_time', 'favourited', 'favoritesCount', 'author']
+            'updatedAt', 'read_time', 'favourited', 'favoritesCount', 'author',
+            'average_ratings',]
 
     def get_created_at(self, obj):
         return obj.created_at
@@ -54,6 +57,11 @@ class ArticleSerializer(serializers.ModelSerializer):
             return False
 
         return request.user.profile.is_favourited(instance)
+        
+    def get_average_ratings(self, obj):
+        average_ratings = Ratings.objects.filter(
+            article=obj.id).values('ratings').aggregate(Avg('ratings'))
+        return average_ratings['ratings__avg']
 
     def create(self, validated_data):
         author = self.context.get("author", None)
@@ -71,3 +79,29 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    ratings = serializers.DecimalField(
+        required=True, max_digits=5, decimal_places=2
+        )
+
+    ratings_by = serializers.SerializerMethodField()
+
+    article = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = Ratings
+        fields = (
+            'ratings', 'rated_on', 'ratings_by', 'article', 
+        )
+        read_only_fields = (
+            'ratings_by', 
+            )
+
+    def get_article(self, obj):
+        return obj.article.slug
+
+    def get_ratings_by(self, obj):
+        return obj.ratings_by.user.username
