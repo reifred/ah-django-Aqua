@@ -62,6 +62,5 @@ class CreateArticleAPIViewTestCase(TestCase):
             {"article": valid_article_2},
             format="json"
         )
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('2 min read', response.data["read_time"])
