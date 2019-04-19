@@ -5,7 +5,7 @@ from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.profiles.serializers import ProfileSerializer
 
 from authors.apps.authentication.serializers import UserSerializer
-from .models import Article
+from .models import Article, LikesDislikesModel
 
 import readtime
 
@@ -24,11 +24,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
     read_time = serializers.SerializerMethodField(method_name='get_readTime')
 
+
     class Meta:
         model = Article
         fields = [
             'slug', 'title', 'description', 'body', 'createdAt', 
-            'updatedAt', 'read_time', 'favoritesCount', 'author']
+            'updatedAt', 'read_time', 'favoritesCount', 'author', 
+            'likes','dislikes',
+            ]
 
     def get_created_at(self, obj):
         return obj.created_at
@@ -59,3 +62,14 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class LikeDislikeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        # since theres no physical input body required, I serialize 
+        # the fields here and attach data to them in the views
+        model= LikesDislikesModel
+        fields= ('likes','article','user_liking','event_date',)
+        write_only_fields = ('user_liking','article',)
+

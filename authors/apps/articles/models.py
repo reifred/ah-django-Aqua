@@ -30,6 +30,11 @@ class Article(models.Model):
 
     read_time = models.TextField()
 
+    likes = models.IntegerField(default=0)
+
+    dislikes = models.IntegerField(default=0)
+
+
     def __str__(self):
         return self.title
 
@@ -37,3 +42,16 @@ class Article(models.Model):
         if not self.slug:
             self.slug = get_unique_slug(self, self.title, 'title', 'slug')
         super().save(*args, **kwargs)
+
+
+class LikesDislikesModel(models.Model):
+    user_liking = models.ForeignKey(
+        User, related_name='user_rating' , 
+        on_delete=models.CASCADE
+        )
+    article = models.ForeignKey(
+        Article, related_name='article', 
+        on_delete=models.CASCADE 
+        )
+    likes = models.BooleanField(default=False, null=True)
+    event_date = models.DateTimeField(auto_now=True)
