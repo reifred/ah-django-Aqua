@@ -33,4 +33,5 @@ if __name__ == "__main__":
     if is_testing:
         cov.stop()
         cov.save()
+        cov.html_report(directory='covhtml')
         cov.report()
