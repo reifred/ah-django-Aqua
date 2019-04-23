@@ -34,6 +34,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         some_one_being_followed = instance
         
         return follower.is_following(some_one_being_followed)
+        
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
 
 class RetrieveProfiles(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')

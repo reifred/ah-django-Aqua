@@ -9,3 +9,16 @@ valid_user2 ={
     "email" : "peter@email.com",
     "password" : "Pass1234"
 }
+
+profile_data = {
+    "profile": {
+        "bio": "I like cycling on weekends.",
+        "image": "https://images.io/my-images/me.png"
+    }
+}
+
+partial_profile_data = {
+    "profile": {
+        "image": "https://images.io/my-images/me.png"
+    }
+}
