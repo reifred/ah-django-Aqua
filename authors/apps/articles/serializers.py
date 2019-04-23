@@ -23,12 +23,13 @@ class ArticleSerializer(serializers.ModelSerializer):
     updatedAt = serializers.SerializerMethodField(method_name='get_updated_at')
     favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
     read_time = serializers.SerializerMethodField(method_name='get_readTime')
+    favourited = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = [
             'slug', 'title', 'description', 'body', 'createdAt', 
-            'updatedAt', 'read_time', 'favoritesCount', 'author']
+            'updatedAt', 'read_time', 'favourited', 'favoritesCount', 'author']
 
     def get_created_at(self, obj):
         return obj.created_at
@@ -36,12 +37,23 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_updated_at(self, obj):
         return obj.updated_at
 
-    def get_favorites_count(self, obj):
-        return obj.favorites_count
+    def get_favorites_count(self, instance):
+        return instance.favourited_by.count()
 
     def get_readTime(self, obj):
         read_time = f"{str(readtime.of_text(obj.body, wpm =256).text)} read"
         return read_time
+
+    def get_favourited(self, instance):
+        request = self.context.get('request', None)
+
+        if not request:
+            return False
+
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.profile.is_favourited(instance)
 
     def create(self, validated_data):
         author = self.context.get("author", None)
