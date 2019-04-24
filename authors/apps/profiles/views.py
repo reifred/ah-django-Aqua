@@ -1,5 +1,6 @@
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.generics import (
+    RetrieveAPIView, RetrieveUpdateAPIView, ListAPIView)
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -33,7 +34,7 @@ class ProfileRetrieveAPIView(RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RetrieveProfilesView(RetrieveAPIView):
+class RetrieveUpdateProfilesView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
@@ -45,6 +46,29 @@ class RetrieveProfilesView(RetrieveAPIView):
             serializer.data,
             status=status.HTTP_200_OK
             )
+    
+    def update(self, request):
+        profile_data = request.data.get("profile", {})
+        profile = self.get_or_create_profile(request)
+
+        serializer = self.serializer_class(
+            profile, data=profile_data,
+            partial=True,
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    def get_or_create_profile(self, request):
+        try:
+            profile = Profile.objects.select_related('user').get(
+                user__username=request.user.username
+            )
+        except Profile.DoesNotExist:
+            # If the user has no profile, create a basic profile.
+            profile = Profile.objects.create(user=request.user)
+        return profile
 
 
 class ProfileFollowAPIView(APIView):
