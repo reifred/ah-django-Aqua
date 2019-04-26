@@ -30,6 +30,10 @@ class Article(models.Model):
 
     read_time = models.TextField()
 
+    likes = models.IntegerField(default=0)
+
+    dislikes = models.IntegerField(default=0)
+
     def __str__(self):
         return self.slug
 
@@ -56,3 +60,16 @@ class Ratings(models.Model):
 
     class Meta:
         ordering = ['-ratings', ]
+
+
+class LikesDislikesModel(models.Model):
+    user_liking = models.ForeignKey(
+        Profile, related_name='user_liking' , 
+        on_delete=models.CASCADE
+        )
+    article = models.ForeignKey(
+        Article, related_name='article', 
+        on_delete=models.CASCADE 
+        )
+    likes = models.BooleanField(default=False, null=True)
+    event_date = models.DateTimeField(auto_now=True)

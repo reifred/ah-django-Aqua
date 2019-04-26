@@ -5,7 +5,7 @@ from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.profiles.serializers import ProfileSerializer
 
 from authors.apps.authentication.serializers import UserSerializer
-from .models import Article, Ratings
+from .models import Article, Ratings, LikesDislikesModel
 from authors.apps.authentication.models import User
 import readtime
 
@@ -31,8 +31,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = [
             'slug', 'title', 'description', 'body', 'createdAt', 
-            'updatedAt', 'read_time', 'favourited', 'favoritesCount', 'author',
-            'average_ratings',]
+            'updatedAt', 'read_time', 'favourited', 'favoritesCount', 
+            'author', 'average_ratings','likes', 'dislikes']
 
     def get_created_at(self, obj):
         return obj.created_at
@@ -105,3 +105,12 @@ class RatingSerializer(serializers.ModelSerializer):
 
     def get_ratings_by(self, obj):
         return obj.ratings_by.user.username
+
+class LikeDislikeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        # since theres no physical input body required, I serialize 
+        # the fields here and attach data to them in the views
+        model= LikesDislikesModel
+        fields= ('likes','article','user_liking','event_date',)
+        write_only_fields = ('user_liking','article',)
