@@ -51,7 +51,7 @@ class RatingView(APIView):
             )
         serializer = RatingSerializer(data=rating_field)
         serializer.is_valid(raise_exception=True)
-        if user.id == article_to_be_rated.author.user_id:
+        if user.profile.id == article_to_be_rated.author.id:
             return Response(
                 {
                     'ratings': [
@@ -63,7 +63,7 @@ class RatingView(APIView):
 
         try:
             Ratings.objects.get(
-                ratings_by=user.pk,
+                ratings_by=user.profile.pk,
                 article_id=article_to_be_rated.pk,
                 ratings=ratings
             )
@@ -72,7 +72,7 @@ class RatingView(APIView):
                 status=status.HTTP_409_CONFLICT)
         except Ratings.DoesNotExist:
             serializer.save(
-                ratings_by_id=user.pk, article=article_to_be_rated
+                ratings_by_id=user.profile.pk, article=article_to_be_rated
                 )
             article_id = article_to_be_rated.pk
 
