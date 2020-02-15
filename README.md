@@ -395,4 +395,4 @@ No additional parameters required
 
 
 
-
+Link to the hosted api [here](https://ah-django-aqua.herokuapp.com/)
